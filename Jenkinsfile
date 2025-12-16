@@ -1,32 +1,29 @@
 pipeline {
   agent any
+
   stages {
+
     stage('Build') {
       steps {
         sh 'dotnet build eShopOnWeb.sln'
       }
     }
 
-    stage('Tests') {
-      parallel {
-        stage('Unit') {
-          steps {
-            sh 'dotnet test tests/UnitTests'
-          }
-        }
+    stage('Unit Tests') {
+      steps {
+        sh 'dotnet test tests/UnitTests --no-build'
+      }
+    }
 
-        stage('Integration') {
-          steps {
-            sh 'dotnet test tests/IntegrationTests'
-          }
-        }
+    stage('Integration Tests') {
+      steps {
+        sh 'dotnet test tests/IntegrationTests --no-build'
+      }
+    }
 
-        stage('Functional') {
-          steps {
-            sh 'dotnet test tests/FunctionalTests'
-          }
-        }
-
+    stage('Functional Tests') {
+      steps {
+        sh 'dotnet test tests/FunctionalTests --no-build'
       }
     }
 
