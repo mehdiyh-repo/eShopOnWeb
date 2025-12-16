@@ -1,40 +1,46 @@
 pipeline {
-  agent any
-  stages {
-    stage('Build') {
-      steps {
-        sh 'dotnet build eShopOnWeb.sln'
-      }
-    }
+    agent any
 
-    stage('Tests') {
-      parallel {
-        stage('Unit') {
-          steps {
-            sh 'dotnet test tests/UnitTests'
-          }
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
         }
 
-        stage('Integration') {
-          steps {
-            sh 'dotnet test tests/IntegrationTests'
-          }
+        stage('Build') {
+            steps {
+                sh 'dotnet build eShopOnWeb.sln'
+            }
         }
 
-        stage('Functional') {
-          steps {
-            sh 'dotnet test tests/FunctionalTests'
-          }
+        stage('Unit Tests') {
+            steps {
+                sh 'dotnet test tests/UnitTests --no-build'
+            }
         }
 
-      }
-    }
+        stage('Integration Tests') {
+            steps {
+                sh 'dotnet test tests/IntegrationTests --no-build'
+            }
+        }
 
-    stage('Deployment') {
-      steps {
-        sh 'dotnet publish eShopOnWeb.sln -o /var/aspnet'
-      }
-    }
+        stage('Functional Tests') {
+            steps {
+                sh 'dotnet test tests/FunctionalTests --no-build'
+            }
+        }
 
-  }
+        stage('Publish Web App') {
+            steps {
+                sh '''
+                  dotnet publish src/Web/Web.csproj \
+                    -c Release \
+                    -o /var/aspnet/web
+                '''
+            }
+        }
+    }
 }
